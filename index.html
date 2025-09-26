@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>KrylToken DApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+<body>
+  <h1>KrylToken DApp</h1>
+
+  <button id="connect">Подключить MetaMask</button>
+  <p id="account"></p>
+
+  <button id="balance">Показать баланс</button>
+  <p id="balanceValue"></p>
+
+  <script>
+    const tokenAddress = "АДРЕС_ТВОЕГО_КОНТРАКТА"; // вставь после деплоя
+    const tokenABI = [
+      "function balanceOf(address owner) view returns (uint256)",
+      "function transfer(address to, uint amount) returns (bool)"
+    ];
+
+    let provider, signer, contract;
+
+    document.getElementById("connect").onclick = async () => {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        const account = await signer.getAddress();
+        document.getElementById("account").innerText = "Аккаунт: " + account;
+        contract = new ethers.Contract(tokenAddress, tokenABI, signer);
+      } else {
+        alert("Установи MetaMask!");
+      }
+    };
+
+    document.getElementById("balance").onclick = async () => {
+      if (!contract) return alert("Сначала подключи MetaMask");
+      const account = await signer.getAddress();
+      const balance = await contract.balanceOf(account);
+      document.getElementById("balanceValue").innerText =
+        "Баланс: " + ethers.utils.formatUnits(balance, 18) + " KRYL";
+    };
+  </script>
+</body>
+</html>
